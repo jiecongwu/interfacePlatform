@@ -57,6 +57,9 @@ public class InterfaceCaseController {
         return R.ok().put("interfaceCase", interfaceCase);
     }
 
+
+
+
     /**
      * 保存
      */
@@ -65,7 +68,7 @@ public class InterfaceCaseController {
     public R save(@RequestBody InterfaceCaseEntity interfaceCase){
 			interfaceCaseService.insert(interfaceCase);
 
-        return R.ok();
+        return R.ok().put("interfaceCase", interfaceCase);
     }
 
     /**
@@ -76,7 +79,7 @@ public class InterfaceCaseController {
     public R update(@RequestBody InterfaceCaseEntity interfaceCase){
 			interfaceCaseService.updateById(interfaceCase);
 
-        return R.ok();
+        return R.ok().put("interfaceCase", interfaceCase);
     }
 
     /**

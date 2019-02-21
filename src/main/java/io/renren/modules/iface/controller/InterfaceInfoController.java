@@ -96,9 +96,8 @@ public class InterfaceInfoController {
     public R save(@RequestBody InterfaceInfoEntity interfaceInfo){
         System.out.println("进来了");
         interfaceInfoService.save(interfaceInfo);
+       return R.ok().put("data", interfaceInfo);
 
-
-        return R.ok();
     }
     /**
      * 修改

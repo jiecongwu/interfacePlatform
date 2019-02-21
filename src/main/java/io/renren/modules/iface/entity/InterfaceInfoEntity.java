@@ -68,6 +68,14 @@ public class InterfaceInfoEntity implements Serializable {
 	 * 请求头列表
 	 */
 	/**
+	 * 域名
+	 */
+	private String baseurl;
+	/**
+	 * url带的参数
+	 */
+	private String urlParma;
+	/**
 	 * 角色ID列表
 	 */
 	@TableField(exist=false)
@@ -206,6 +214,31 @@ public class InterfaceInfoEntity implements Serializable {
 		return updateTime;
 	}
 
+	/**
+	 * 设置：域名
+	 */
+	public void setBaseurl(String baseurl) {
+		this.baseurl = baseurl;
+	}
+	/**
+	 * 获取：域名
+	 */
+	public String getBaseurl() {
+		return baseurl;
+	}
+
+	/**
+	 * 设置：域名
+	 */
+	public void setUrlParma(String urlParma) {
+		this.urlParma = urlParma;
+	}
+	/**
+	 * 获取：域名
+	 */
+	public String getUrlParma() {
+		return urlParma;
+	}
 	public List<InterfaceHeadEntity> getHead(){
 		return this.head;
 	}

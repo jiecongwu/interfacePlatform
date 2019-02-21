@@ -52,7 +52,7 @@ public class InterfaceCaseRequestEntity implements Serializable {
 	 * 后置请求，多个逗号分隔
 	 */
 	private String afterCaseId;
-
+	private String	 urlParam;
 	/**
 	 * 角色ID列表
 	 */
@@ -155,6 +155,16 @@ public class InterfaceCaseRequestEntity implements Serializable {
 	public String getAfterCaseId() {
 		return afterCaseId;
 	}
+	public void setUrlParam(String urlParam) {
+		this.urlParam = urlParam;
+	}
+	/**
+	 * 获取：后置请求，多个逗号分隔
+	 */
+	public String getUrlParam() {
+		return this.urlParam;
+	}
+
 
 	public List<InterfaceHeadEntity> getHead(){
 		return this.head;

@@ -120,22 +120,25 @@ public class InterfaceRequestController {
        //判断是否加密
          status = interfaceCaseRequestEntity.getUrl().contains("gateway/");
         if(status){
-            if(interfaceCaseRequestEntity.getUrl().contains("/outter/"))
-        {   status=true;
+
             FtcspRestClient client = new FtcspRestClient("000106", "yu1qoj8kyu1qoj8k", "6ECD141F8B991FB2616214018D9BA32F");
             appDesKey="yu1qoj8kyu1qoj8k";
             List urldata = client.post1(url, interfaceCaseRequestEntity.getBody());
             url = urldata.get(0).toString();
-            System.out.println(url);
-            data = urldata.get(1).toString();
-        } else { status=false;}
-      }
-            else{
-            System.out.println("status");
+            if(interfaceCaseRequestEntity.getUrl().contains("/outter/"))
+            {   status=true; data = urldata.get(1).toString();}
+            else { status=false; data=interfaceCaseRequestEntity.getBody();}
+           }
+        else{
+            data=interfaceCaseRequestEntity.getBody();
             System.out.println(interfaceCaseRequestEntity.getUrl());
 
         }
-
+        //添加后续的url参数
+        url=interfaceCaseRequestEntity.getUrlParam()==null || interfaceCaseRequestEntity.getUrlParam().equals("")?url:url+"&"+interfaceCaseRequestEntity.getUrlParam();
+        reparam.put("url",url);
+        reparam.put("method",interfaceCaseRequestEntity.getMethod());
+        reparam.put("body",interfaceCaseRequestEntity.getBody());
 
         //  client.post("http://tpt.jchl.com/gateway/ordercenter/outter/order/fullRefund", postDataString);
         //  System.out.println(client.getResponseContent());
@@ -160,11 +163,19 @@ public class InterfaceRequestController {
         // 设置请求数据
 
         StringEntity stringEntity = new StringEntity(data, "UTF-8");
-        stringEntity.setContentType("text/json;charset=UTF-8");
+        stringEntity.setContentEncoding("UTF-8");
+        String ContentType =status?"text/json;charset=UTF-8":"application/json";
+        stringEntity.setContentType(ContentType);
         ((HttpPost) httpUriRequest).setEntity(stringEntity);
 
 // 请求数据
-         requestData(httpclient, httpUriRequest);
+        try{
+            requestData(httpclient, httpUriRequest);
+
+        }catch (Exception e){
+            return R.ok().put("res_data", reparam);
+
+        }
 
         return R.ok().put("res_data", reparam);
 
@@ -252,7 +263,9 @@ public class InterfaceRequestController {
         } catch (IOException e2) {
             RuntimeException e = new RuntimeException(e2);
             log.error(e);
+            reparam.put("responseContent",e.getMessage());
             throw e;
+
         }
 
     }
