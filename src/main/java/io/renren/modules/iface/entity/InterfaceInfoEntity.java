@@ -244,6 +244,7 @@ public class InterfaceInfoEntity implements Serializable {
 	}
 	public  void setHead(List<InterfaceHeadEntity> head){
 		this.head = head;
+
 }
 }
 
