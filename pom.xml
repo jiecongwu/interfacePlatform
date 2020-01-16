@@ -96,6 +96,14 @@
 			<artifactId>mybatisplus-spring-boot-starter</artifactId>
 			<version>${mybatisplus.spring.boot.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>net.sf.json-lib</groupId>
+			<artifactId>json-lib</artifactId>
+			<version>2.4</version>
+			<classifier>jdk15</classifier>
+		</dependency>
+
 		<dependency>
 			<groupId>com.baomidou</groupId>
 			<artifactId>mybatis-plus</artifactId>

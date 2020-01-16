@@ -3,6 +3,7 @@ import io.renren.common.utils.DESUtil;
 import io.renren.common.utils.PageUtils;
 import io.renren.common.utils.R;
 import io.renren.modules.iface.entity.InterfaceCaseEntity;
+import io.renren.modules.iface.entity.InterfaceHeadEntity;
 import io.renren.modules.iface.service.InterfaceCaseService;
 import org.apache.http.Header;
 import org.apache.http.HttpStatus;
@@ -53,9 +54,12 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
+import com.google.gson.Gson;
 import java.util.List;
 import io.renren.common.utils.Jackson;
 import io.renren.common.utils.outter.FtcspRestClient;
+import io.renren.common.utils.outter.PaySign;
+
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
@@ -64,6 +68,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.ssl.SSLContextBuilder;
 import io.renren.modules.iface.entity.InterfaceCaseRequestEntity;
+import io.renren.common.utils.DateUtils;
 
 /**
  * 接口实例表
@@ -117,20 +122,80 @@ public class InterfaceRequestController {
 
         String data ="";
         String url =interfaceCaseRequestEntity.getUrl() ;
+        String body= interfaceCaseRequestEntity.getBody();
+
+        //转换当前时间timeStamp
+        if (body.indexOf("{timeStamp}")!=-1)
+        {log.info("进入replace");
+            body=body.replace("{timeStamp}",String.valueOf(System.currentTimeMillis()));
+
+            log.info(body);
+        }
+        //
+
        //判断是否加密
          status = interfaceCaseRequestEntity.getUrl().contains("gateway/");
         if(status){
 
+
             FtcspRestClient client = new FtcspRestClient("000106", "yu1qoj8kyu1qoj8k", "6ECD141F8B991FB2616214018D9BA32F");
             appDesKey="yu1qoj8kyu1qoj8k";
-            List urldata = client.post1(url, interfaceCaseRequestEntity.getBody());
+
+            Gson gson = new Gson();
+            HashMap<String, String> map = new HashMap<String, String>();
+            map = gson.fromJson(body, map.getClass());
+           //转换传入的time为timestap毫秒
+            for(String key : map.keySet()){
+                String value = map.get(key) instanceof String?map.get(key):"aaa";
+
+                if(value.indexOf("$")!=-1)
+                {
+
+                    Long d=DateUtils.getTimeStamp(value.replace("$", ""));
+                    map.put(key,d.toString());
+                    body = gson.toJson(map);
+
+                }
+            }
+
+                //判断是否要另外的pay_sign加密
+            if (body.indexOf("sign")!=-1)
+            {
+
+                String signName=map.get("sign") ;
+
+                map.remove("sign");
+                //测试环
+               String sign=PaySign.genSign(map, "61a9250c107349af9b5135a0677926ee");
+                //预生产
+               // String sign=PaySign.genSign(map, "048b867114014d009771a01311ef8996");
+
+              //  String sign=PaySign.genSign(map, "b774b3c7b09548378b0d3ec131112eb4");
+
+
+                map.put(signName, sign);
+
+                 Gson gson1 = new Gson();
+                log.info(map);
+
+
+
+            }
+            body = gson.toJson(map);
+            log.info("body");
+
+            log.info(body);
+
+            List urldata = client.post1(url, body);
             url = urldata.get(0).toString();
             if(interfaceCaseRequestEntity.getUrl().contains("/outter/"))
-            {   status=true; data = urldata.get(1).toString();}
-            else { status=false; data=interfaceCaseRequestEntity.getBody();}
+            {   status=true; data = urldata.get(1).toString();
+            log.info("data:" + data);
+            }
+            else { status=false; data=body;}
            }
         else{
-            data=interfaceCaseRequestEntity.getBody();
+            data=body;
             System.out.println(interfaceCaseRequestEntity.getUrl());
 
         }
@@ -138,7 +203,7 @@ public class InterfaceRequestController {
         url=interfaceCaseRequestEntity.getUrlParam()==null || interfaceCaseRequestEntity.getUrlParam().equals("")?url:url+"&"+interfaceCaseRequestEntity.getUrlParam();
         reparam.put("url",url);
         reparam.put("method",interfaceCaseRequestEntity.getMethod());
-        reparam.put("body",interfaceCaseRequestEntity.getBody());
+        reparam.put("body",body);
 
         //  client.post("http://tpt.jchl.com/gateway/ordercenter/outter/order/fullRefund", postDataString);
         //  System.out.println(client.getResponseContent());
@@ -153,19 +218,28 @@ public class InterfaceRequestController {
         }
 
         // 设置头信息
+           if(interfaceCaseRequestEntity.getHead().size()==0)
 
-        for(int i=0;i<interfaceCaseRequestEntity.getHead().size();i++)
-        {
-            httpUriRequest.addHeader(interfaceCaseRequestEntity.getHead().get(i).getName(), interfaceCaseRequestEntity.getHead().get(i).getValue());
+   {   log.info("添加header");
+          httpUriRequest.addHeader("Content-Type", "application/json;charset=UTF-8");
+          httpUriRequest.addHeader("Accept", "application/json;charset=UTF-8");
+          httpUriRequest.addHeader("Accept-Charset", "UTF-8");
 
-        }
+
+    }
+       else {
+               for (int i = 0; i < interfaceCaseRequestEntity.getHead().size(); i++) {
+                   httpUriRequest.addHeader(interfaceCaseRequestEntity.getHead().get(i).getName(), interfaceCaseRequestEntity.getHead().get(i).getValue());
+
+               }
+           }
 
         // 设置请求数据
 
         StringEntity stringEntity = new StringEntity(data, "UTF-8");
         stringEntity.setContentEncoding("UTF-8");
-        String ContentType =status?"text/json;charset=UTF-8":"application/json";
-        stringEntity.setContentType(ContentType);
+       // String ContentType =status?"text/json;charset=UTF-8":"application/json";
+        //stringEntity.setContentType(ContentType);
         ((HttpPost) httpUriRequest).setEntity(stringEntity);
 
 // 请求数据
@@ -233,6 +307,7 @@ public class InterfaceRequestController {
             if (status){
 
                     try {
+                        log.debug("sb.toString(): " + sb.toString());
                         responseContent = DESUtil.decrypt(sb.toString(), appDesKey, true);
                         log.info(" response data: " + responseContent);
                         reparam.put("responseContent",responseContent);

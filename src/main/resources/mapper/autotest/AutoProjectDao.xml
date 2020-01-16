@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.autotest.dao.AutoProjectDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <select id="selectByUserId" parameterType="Long" resultType="io.renren.modules.autotest.entity.AutoProjectEntity">
+        select a.* from auto_project a,auto_user_project u where a.project_id=u.project_id and u.user_id= #{user_id}
+    </select>
+
+</mapper>

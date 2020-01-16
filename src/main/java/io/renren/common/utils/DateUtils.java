@@ -22,6 +22,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -172,5 +173,24 @@ public class DateUtils {
     public static Date addDateYears(Date date, int years) {
         DateTime dateTime = new DateTime(date);
         return dateTime.plusYears(years).toDate();
+    }
+
+    /**
+     * 根据时间返回时间戳
+     *
+     * @param time 日期
+     * @return 加/减几年后的日期
+     */
+    public static Long getTimeStamp(String time) {
+        SimpleDateFormat format =  new SimpleDateFormat("yyyyMMdd HH:mm:ss");
+        Date date = null;
+        try {
+            date = format.parse(time);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        //日期转时间戳（毫秒）
+        long timestapm=date.getTime();
+        return timestapm;
     }
 }
